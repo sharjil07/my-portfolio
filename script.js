@@ -59,24 +59,52 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // --- 3D Tilt Animation for Profile Picture ---
+       // --- 3D Tilt and Flip Animation for Profile Picture ---
     const heroImage = document.querySelector('.hero-image');
     if (heroImage) {
+        let isAnimating = false; // Flag to check if click animation is running
+
+        // 3D Tilt on Mouse Move
         heroImage.addEventListener('mousemove', (e) => {
+            // Don't apply tilt if the flip animation is running
+            if (isAnimating) return;
+
             const { left, top, width, height } = heroImage.getBoundingClientRect();
             const x = e.clientX - left - width / 2;
             const y = e.clientY - top - height / 2;
             const tiltFactor = 15;
             const rotateY = (x / (width / 2)) * tiltFactor;
             const rotateX = (-1 * (y / (height / 2))) * tiltFactor;
+            
+            heroImage.style.transition = 'transform 0.1s ease'; // Fast transition for tracking
             heroImage.style.transform = `scale(1.05) perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
         });
+
+        // Reset transform on mouse leave
         heroImage.addEventListener('mouseleave', () => {
-            heroImage.style.transition = 'transform 0.5s ease-out';
+             // Don't apply tilt if the flip animation is running
+            if (isAnimating) return;
+
+            heroImage.style.transition = 'transform 0.5s ease-out'; // Smooth transition for reset
             heroImage.style.transform = 'scale(1) perspective(1000px) rotateX(0deg) rotateY(0deg)';
         });
-        heroImage.addEventListener('mouseenter', () => {
-            heroImage.style.transition = 'transform 0.1s ease';
+
+        // --- Showstopper Flip Animation on Click ---
+        heroImage.addEventListener('click', () => {
+            // Only run if not already animating
+            if (!isAnimating) {
+                isAnimating = true;
+                heroImage.classList.add('is-flipping');
+                
+                // Remove the tilt transform so animation is clean
+                heroImage.style.transform = ''; 
+            }
+        });
+
+        // Reset after animation ends
+        heroImage.addEventListener('animationend', () => {
+            heroImage.classList.remove('is-flipping');
+            isAnimating = false; // Animation is done, allow mouse-move again
         });
     }
 
